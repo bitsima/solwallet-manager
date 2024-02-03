@@ -18,6 +18,7 @@
   "homepage": "https://github.com/bitsima/solwallet-manager#readme",
   "dependencies": {
     "@solana/web3.js": "^1.89.1",
+    "bigint-buffer": "^1.1.5",
     "esrun": "^3.2.26",
     "typescript": "^5.3.3"
   }
