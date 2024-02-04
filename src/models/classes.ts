@@ -7,20 +7,11 @@ export class Wallet {
     publicKey: string;
     secretKey: Uint8Array
 
-    constructor(walletName: string, publicKey: string, secretKey: Uint8Array, balance?: number) {
+    constructor(walletName: string, publicKey: string, secretKey: Uint8Array, balance: number) {
         this.walletName = walletName;
+        this.balance = balance;
         this.publicKey = publicKey;
         this.secretKey = secretKey;
-
-        if (balance) {
-            this.balance = balance;
-        }
-        else {
-            const address = new PublicKey(publicKey);
-            CONNECTION.getBalance(address).then(latest => {
-                this.balance = latest;
-            });
-        }
     }
 
 
@@ -28,13 +19,13 @@ export class Wallet {
      * Checks if the current balance is the same with the one provided in the wallets.json.
      * If not, updates the balance value and throws an error to alert the user of the update.
      */
-    public checkBalance(): void {
+    public async checkBalance(): Promise<void> {
         const address = new PublicKey(this.publicKey);
-        CONNECTION.getBalance(address).then(latest => {
+        const latest = await CONNECTION.getBalance(address);
+
+        if (latest != this.balance) {
             this.balance = latest;
-            if (latest != this.balance) {
-                throw new Error('Balance mismatch. System balance differs from provided balance.');
-            }
-        });
+            throw new Error('Balance mismatch. System balance differs from provided balance.');
+        }
     }
 }
