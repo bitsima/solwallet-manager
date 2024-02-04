@@ -8,6 +8,7 @@ import {
     SystemProgram,
     sendAndConfirmTransaction,
     PublicKey,
+    LAMPORTS_PER_SOL
 } from "@solana/web3.js";
 
 import { CONNECTION } from './index';
@@ -34,6 +35,10 @@ export async function readWallets(): Promise<Wallet[]> {
                 walletJson.balance
             );
         });
+
+        parsedWalletData.forEach(walletObj => {
+            updateBalance(walletObj)
+        });
     } catch (error) {
         // Handle file not found or invalid JSON
         console.log(`Error reading or parsing wallets.json: ${error.message}\nA new wallets.json file will be created.`);
@@ -42,44 +47,44 @@ export async function readWallets(): Promise<Wallet[]> {
 }
 
 
-export function selectWallet() {
-    readWallets().then(wallets => {
+export async function selectWallet(): Promise<Wallet> {
+    let selectedWallet: Wallet;
 
-        if (wallets.length > 0) {
-            console.log(chalk.yellow('Detected existing wallets:'));
+    let wallets = await readWallets();
 
-            // Iterate though the wallets in the wallets.json
-            let index: number = 0;
-            wallets.forEach(wallet => {
-                console.log(`[${++index}] - Wallet Name: ${wallet.walletName}, Public Key: ${wallet.publicKey}`);
-            });
+    if (wallets.length > 0) {
+        console.log(chalk.yellow('Detected existing wallets:'));
 
-            // Let the user choose which wallet to use for this instance 
-            const rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            });
-            rl.question('Please enter the order number of the wallet you want to interact with: ', (orderNumber) => {
+        // Iterate though the wallets in the wallets.json
+        let index: number = 0;
+        wallets.forEach(wallet => {
+            console.log(`[${++index}] - Wallet Name: ${wallet.walletName}, Public Key: ${wallet.publicKey}`);
+        });
 
-                const selectedWallet = wallets[parseInt(orderNumber, 10) - 1];
+        // Let the user choose which wallet to use for this instance 
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.question('Please enter the order number of the wallet you want to interact with: ', (orderNumber) => {
 
-                if (selectedWallet) {
-                    console.log(`You selected: Wallet Name: ${selectedWallet.walletName}, Public Key: ${selectedWallet.publicKey}, Secret Key: ${selectedWallet.secretKey}`);
-                } else {
-                    console.log('Invalid order number. Please try again.');
-                }
+            selectedWallet = wallets[parseInt(orderNumber, 10) - 1];
 
-                // Close the readline interface
-                rl.close();
+            if (selectedWallet) {
+                console.log(`You selected: Wallet Name: ${selectedWallet.walletName}, Public Key: ${selectedWallet.publicKey}`);
+            } else {
+                console.log('Invalid order number. Please try again.');
+            }
 
-                return selectedWallet;
-            });
-        } else {
-            console.log(chalk.gray('No existing wallets detected. If you want to create one or provide it yourself, check command "new".'));
-        }
-    });
+            // Close the readline interface
+            rl.close();
 
-
+            return selectedWallet;
+        });
+    } else {
+        console.log(chalk.gray('No existing wallets detected. If you want to create one or provide it yourself, check command "new".'));
+    }
+    return selectedWallet;
 }
 
 /**
@@ -99,27 +104,17 @@ export async function createWallet(walletName: string): Promise<void> {
 
 
     const parsedWalletData = await readWallets();
-    const newWallet = new Wallet(walletName, publicKey, secretKeyUint8Array);
+    const newWallet = new Wallet(walletName, publicKey, secretKeyUint8Array, 0);
 
     parsedWalletData.push(newWallet);
-
-    parsedWalletData.forEach(walletObj => {
-        const oldBalance = walletObj.balance;
-
-        try {
-            walletObj.checkBalance();
-        } catch (error) {
-            console.log(`Your balance on the wallet named '${walletObj.walletName}'\nhas been updated from '${oldBalance}' to '${walletObj.balance}'.`)
-        }
-    });
 
     // Serializing the data back to JSON
     const jsonData = {
         'data': parsedWalletData.map(wallet => ({
             walletName: wallet.walletName,
-            publicKey: wallet.publicKey,
-            secretKey: Array.from(wallet.secretKey),
             balance: wallet.balance,
+            publicKey: wallet.publicKey,
+            secretKey: Array.from(wallet.secretKey)
         }))
     };
 
@@ -132,11 +127,30 @@ export async function createWallet(walletName: string): Promise<void> {
     }
 }
 
-/*
 
-export async function handleAirdropCommand(amount: number) {
-    await airdrop(amount);
+export async function handleAirdrop(walletObj: Wallet, amount: number) {
+    try {
+        const myAddress = new PublicKey(walletObj.publicKey);
+        const signature = await CONNECTION.requestAirdrop(myAddress, amount * LAMPORTS_PER_SOL);
+        await CONNECTION.confirmTransaction(signature);
+    } catch (error) {
+        console.error('Error while handling airdrop:', error);
+    }
+
+    await updateBalance(walletObj);
 }
+
+
+async function updateBalance(walletObj: Wallet) {
+    const oldBalance = walletObj.balance;
+
+    try {
+        await walletObj.checkBalance();
+    } catch (error) {
+        console.log(`Your balance on the wallet named '${walletObj.walletName}'\nhas been updated from '${oldBalance / LAMPORTS_PER_SOL}' SOL to '${walletObj.balance / LAMPORTS_PER_SOL}' SOL.`)
+    }
+}
+/*
 
 export async function handleBalanceCommand() {
     await checkBalance();

@@ -2,9 +2,9 @@
 
 import * as commander from 'commander';
 import * as chalk from 'chalk';
-import { Connection, clusterApiUrl } from "@solana/web3.js";
+import { Connection, clusterApiUrl } from '@solana/web3.js';
 
-import { readWallets, createWallet, selectWallet } from './utils';
+import { createWallet, selectWallet, handleAirdrop } from './utils';
 
 
 
@@ -37,13 +37,32 @@ program
         }
     });
 
-/*
+
 
 program
-    .command('airdrop <amount>')
+    .command('airdrop [amountInSOL]')
     .description('Request an airdrop to a managed wallet.')
-    .action((amount) => airdrop(amount));
+    .action(async (amount = 1) => {
 
+        // Parse the amount to ensure it's a valid number
+        let parsedAmount = parseFloat(amount);
+
+        // Check if the parsed amount is NaN or exceeds the maximum allowed
+        if (isNaN(parsedAmount) || parsedAmount > 5) {
+            console.error('Invalid amount. Setting amount to the maximum allowed (5 SOLs).');
+            parsedAmount = 5;  // Set amount to the maximum allowed
+        }
+        else {
+            console.log(`Chosen amount to airdrop is ${parsedAmount} SOL.`)
+        }
+
+        const selectedWalletObj = await selectWallet();
+        console.log(selectedWalletObj.publicKey);
+        await handleAirdrop(selectedWalletObj, parsedAmount);
+    });
+
+
+/*
 program
     .command('balance')
     .description('Check wallet funds.')
