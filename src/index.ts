@@ -29,14 +29,9 @@ program
     .command('new')
     .description('Create or manage Solana wallets.')
     .option('-c, --create <wallet_name>', 'Generate a new public-private key pair')
-    .option('-e, --existing <wallet_name:public_key>', 'Accept an existing public key and give the wallet a name')
     .action((cmd) => {
         if (cmd.create) {
             createWallet(cmd.create);
-        } else if (cmd.existing) {
-            const [walletName, publicKey] = cmd.existing.split(':');
-            createWallet(walletName, publicKey);
-
         } else {
             console.error('Invalid command. Use --help for usage information.');
         }
