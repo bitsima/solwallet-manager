@@ -86,37 +86,17 @@ export function selectWallet() {
  * Allows the user to provide a key pair manually or generates a new key pair if they are not given, 
  * either way, this function saves the new wallet info to the wallets.json.
  * @param walletName the chosen arbitrary name to be given to the new wallet
- * @param publicKey optional argument that allows the user to provide the public key themselves
  */
-export async function createWallet(walletName: string, publicKey?: string): Promise<void> {
+export async function createWallet(walletName: string): Promise<void> {
 
-    let secretKeyUint8Array;
+    // New key pair generated
+    const keypair = Keypair.generate();
 
-    if (publicKey) {
-        // Prompt the user to enter the secret key
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
+    const publicKey = keypair.publicKey.toBase58();
+    console.log('Your generated public key is: ', publicKey);
 
-        rl.question('Please enter the secret key as a sequence of bytes (e.g., 255 0 127 ...): ', (byteInput) => {
-            rl.close();
+    const secretKeyUint8Array = keypair.secretKey;
 
-            const byteValues = byteInput.split(/\s+/).map(Number);
-            secretKeyUint8Array = new Uint8Array(byteValues);
-        });
-    }
-
-    // The case where the optional parameters are not given
-    else if (!publicKey) {
-        // New key pair generated
-        const keypair = Keypair.generate();
-
-        publicKey = keypair.publicKey.toBase58();
-        console.log('Your generated public key is: ', publicKey);
-
-        secretKeyUint8Array = keypair.secretKey;
-    }
 
     const parsedWalletData = await readWallets();
     const newWallet = new Wallet(walletName, publicKey, secretKeyUint8Array);
@@ -129,7 +109,7 @@ export async function createWallet(walletName: string, publicKey?: string): Prom
         try {
             walletObj.checkBalance();
         } catch (error) {
-            console.log(`Your balance has been updated from '${oldBalance}' to '${walletObj.balance}'.`)
+            console.log(`Your balance on the wallet named '${walletObj.walletName}'\nhas been updated from '${oldBalance}' to '${walletObj.balance}'.`)
         }
     });
 
