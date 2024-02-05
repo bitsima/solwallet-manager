@@ -87,3 +87,10 @@ Example wallets.json format provided below:
     ]
 }
 ```
+
+## TODO
+
++ add command for displaying some statistics on the solana network
++ add command to track a selected transaction on the solana network
++ delete wallet command
++ logger
