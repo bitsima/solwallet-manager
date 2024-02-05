@@ -11,6 +11,7 @@ import {
 import { CONNECTION, WALLETS_MAP } from './index';
 import { Wallet } from './models/classes';
 import { updateBalance, writeWallets } from './helpers';
+import chalk = require('chalk');
 
 /**
  * Generates a new key pair and saves the new wallet info to the wallets.json.
@@ -46,7 +47,7 @@ export async function handleAirdrop(walletObj: Wallet, amount: number) {
         const signature = await CONNECTION.requestAirdrop(myAddress, amount * LAMPORTS_PER_SOL);
         await CONNECTION.confirmTransaction(signature);
     } catch (error) {
-        console.error('Error while handling airdrop:', error);
+        console.error(chalk.redBright('Error while handling airdrop:'), error);
     }
     await updateBalance(walletObj);
 }
@@ -86,7 +87,7 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
 
     // Create a Promise to wrap the rl.question
     const questionPromise = new Promise<string>((resolve) => {
-        rl.question(`Estimated fee for this transaction will be: ${estimatedFee / LAMPORTS_PER_SOL} SOL. Do you want to proceed with it? [Y, n]  `, (answer = "Y") => {
+        rl.question(chalk.bgCyanBright(`Estimated fee for this transaction will be: ${estimatedFee / LAMPORTS_PER_SOL} SOL. Do you want to proceed with it? [Y, n]  `), (answer = "Y") => {
             resolve(answer.trim() || "Y"); // Trim to remove leading/trailing whitespaces, set "Y" as the default
         });
     });
@@ -99,7 +100,7 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
         console.log("Proceeding with the operation...");
     }
     else if (answer.toLowerCase() === "n") {
-        console.log("Exiting the function...");
+        console.log(chalk.magenta("Exiting the function..."));
         return;
     }
     else {
@@ -114,6 +115,6 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
         // Update balance of the sender wallet in the wallets.json
         await updateBalance(selectedWalletObj);
     } catch (error) {
-        console.error("There was an error while sending the transaction: ", error);
+        console.error(chalk.redBright("There was an error while sending the transaction: "), error);
     }
 }

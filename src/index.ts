@@ -33,12 +33,12 @@ program
     .option('-c, --create <wallet_name>', 'Generate a new public-private key pair')
     .action((cmd) => {
         if (WALLETS_MAP.has(cmd.create)) {
-            console.error('Duplicate wallet names are not allowed. Please provide another name for the new wallet.');
+            console.error(chalk.redBright('Duplicate wallet names are not allowed. Please provide another name for the new wallet.'));
         }
         else if (cmd.create) {
             createWallet(cmd.create);
         } else {
-            console.error('Invalid command. Use --help for usage information.');
+            console.error(chalk.redBright('Invalid command. Use --help for usage information.'));
         }
     });
 
@@ -58,7 +58,7 @@ program
 
         // Check if the parsed amount is NaN or exceeds the maximum allowed
         if (isNaN(parsedAmount) || parsedAmount > 1) {
-            console.error('Invalid amount. Setting amount to the maximum allowed (1 SOLs).');
+            console.error(chalk.magenta('Invalid amount. Setting amount to the maximum allowed (1 SOLs).'));
             parsedAmount = 1;  // Set amount to the maximum allowed
         }
         else {
