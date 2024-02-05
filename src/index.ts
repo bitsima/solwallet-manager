@@ -2,14 +2,20 @@
 
 import * as commander from 'commander';
 import * as chalk from 'chalk';
-import { Connection, clusterApiUrl } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 
-import { createWallet, handleAirdrop } from './commands';
-import { selectWallet } from './helpers';
+import { createWallet, handleAirdrop, transferSOL } from './commands';
+import { readWallets, selectWallet, updateBalance } from './helpers';
 
 
+// Change this url to change the net the app works on
+const CLUSTER_URL = "https://api.testnet.solana.com";
 
-export const CONNECTION = new Connection(clusterApiUrl("devnet"));
+
+export const CONNECTION = new Connection(CLUSTER_URL, "confirmed");
+
+export const WALLETS_MAP = readWallets();
+
 
 const program = new commander.Command();
 
@@ -20,10 +26,6 @@ program
     // Greet the user and check for existing wallets in the wallets.json when called with no commands
     .action(() => {
         console.log(chalk.bold.green('Welcome to Solana Wallet Manager!'));
-
-        selectWallet()
-
-
     });
 
 program
@@ -31,7 +33,10 @@ program
     .description('Create or manage Solana wallets.')
     .option('-c, --create <wallet_name>', 'Generate a new public-private key pair')
     .action((cmd) => {
-        if (cmd.create) {
+        if (WALLETS_MAP.has(cmd.create)) {
+            console.error('Duplicate wallet names are not allowed. Please provide another name for the new wallet.');
+        }
+        else if (cmd.create) {
             createWallet(cmd.create);
         } else {
             console.error('Invalid command. Use --help for usage information.');
@@ -39,11 +44,15 @@ program
     });
 
 
-
 program
     .command('airdrop [amountInSOL]')
     .description('Request an airdrop to a managed wallet.')
     .action(async (amount = 1) => {
+
+        let selectedWalletObj = await selectWallet();
+        if (selectedWalletObj == null) {
+            return;
+        }
 
         // Parse the amount to ensure it's a valid number
         let parsedAmount = parseFloat(amount);
@@ -57,23 +66,31 @@ program
             console.log(`Chosen amount to airdrop is ${parsedAmount} SOL.`)
         }
 
-        let selectedWalletObj = await selectWallet();
         await handleAirdrop(selectedWalletObj, parsedAmount);
     });
 
-
-/*
 program
     .command('balance')
-    .description('Check wallet funds.')
-    .action(() => checkBalance());
+    .description('Check and update wallet funds.')
+    .action(async () => {
+        let selectedWalletObj = await selectWallet();
+        if (selectedWalletObj != null) {
+            await updateBalance(selectedWalletObj);
+        }
+    });
 
 
 program
-    .command('transfer <publicKey> <amount>')
+    .command('transfer <otherPublicKey> <amountInSol>')
     .description('Send SOL to a specified wallet.')
-    .action((publicKey, amount) => transfer(publicKey, amount));
+    .action(async (otherPublicKey, amount) => {
+        let selectedWalletObj = await selectWallet();
+        if (selectedWalletObj != null) {
+            await transferSOL(selectedWalletObj, otherPublicKey, amount);
+        }
+    });
 
+/*
 program
     .command('statistics')
     .description('Retrieve statistics on the Solana Devnet.')
