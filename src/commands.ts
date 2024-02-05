@@ -1,6 +1,5 @@
 import {
     Keypair,
-    Connection,
     Transaction,
     SystemProgram,
     sendAndConfirmTransaction,
@@ -8,9 +7,10 @@ import {
     LAMPORTS_PER_SOL
 } from "@solana/web3.js";
 
-import { CONNECTION } from './index';
+import { CONNECTION, WALLETS_MAP } from './index';
 import { Wallet } from './models/classes';
-import { readWallets, writeWallets } from './helpers';
+import { updateBalance, writeWallets } from './helpers';
+import * as readline from 'readline';
 
 
 
@@ -29,13 +29,12 @@ export async function createWallet(walletName: string): Promise<void> {
 
     const secretKeyUint8Array = keypair.secretKey;
 
-
-    const parsedWalletData = await readWallets();
     const newWallet = new Wallet(walletName, publicKey, secretKeyUint8Array, 0);
 
-    parsedWalletData.push(newWallet);
+    // Add the new wallet to the global wallets map
+    WALLETS_MAP.set(newWallet.walletName, newWallet);
 
-    await writeWallets(parsedWalletData);
+    await writeWallets();
 }
 
 
@@ -47,19 +46,76 @@ export async function handleAirdrop(walletObj: Wallet, amount: number) {
     } catch (error) {
         console.error('Error while handling airdrop:', error);
     }
+    await updateBalance(walletObj);
 }
 
+export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: string, amount: number) {
 
+    // Create a transaction 
+    const tx = new Transaction().add(
+        SystemProgram.transfer({
+            fromPubkey: new PublicKey(selectedWalletObj.publicKey),
+            toPubkey: new PublicKey(otherPublicKey),
+            lamports: amount * LAMPORTS_PER_SOL,
+        })
+    );
+
+    const keypair = Keypair.fromSecretKey(selectedWalletObj.secretKey)
+
+    // Set recent blockhash 
+    let blockhash = (await CONNECTION.getLatestBlockhash('finalized')).blockhash;
+    tx.recentBlockhash = blockhash;
+
+    // Set feepayer for the transaction
+    tx.feePayer = new PublicKey(selectedWalletObj.publicKey);
+
+    const estimatedFee = await tx.getEstimatedFee(CONNECTION);
+
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    // Create a Promise to wrap the rl.question
+    const questionPromise = new Promise<string>((resolve) => {
+        rl.question(`Estimated fee for this transaction will be: ${estimatedFee / LAMPORTS_PER_SOL} SOL. Do you want to proceed with it? [Y, n]  `, (answer = "Y") => {
+            resolve(answer.trim() || "Y"); // Trim to remove leading/trailing whitespaces, set "Y" as the default
+        });
+    });
+
+    // Wait for the user's input
+    const answer = await questionPromise;
+
+    // Close the readline interface
+    rl.close();
+
+
+    if (answer.toLowerCase() === "y") {
+        console.log("Proceeding with the operation...");
+    }
+    else if (answer.toLowerCase() === "n") {
+        console.log("Exiting the function...");
+        return;
+    }
+    else {
+        // Handle other cases
+        console.log("Invalid input. Please try again.");
+        return;
+    }
+
+
+    try {
+        const signature = await sendAndConfirmTransaction(CONNECTION, tx, [keypair]);
+        console.log("Transaction successfully sent! Here is the signature: ", signature);
+        await updateBalance(selectedWalletObj);
+    } catch (error) {
+        console.error("There was an error while sending the transaction: ", error);
+    }
+
+}
 
 /*
-
-export async function handleBalanceCommand() {
-    await checkBalance();
-}
-
-export async function handleTransferCommand(otherPublicKey: string, amount: number) {
-    await transfer(otherPublicKey, amount);
-}
 
 export async function handleStatisticsCommand() {
     await getStatistics();
