@@ -92,5 +92,7 @@ Example wallets.json format provided below:
 
 + add command for displaying some statistics on the solana network
 + add command to track a selected transaction on the solana network
++ generate keypair from seed option
++ generate keypair by mnemonic phrase option
 + delete wallet command
 + logger
