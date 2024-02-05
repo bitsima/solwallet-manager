@@ -60,7 +60,7 @@ Options:
 ```
 
 ### 4. 'transfer'
-Sends SOL to a specified wallet. The user needs to provide the public key of the wallet the transfer will be directed to, along with the amount to be transferred in SOL. **__Make sure the sender/feepayer account has enough funds for the fee!__**
+Sends SOL to a specified wallet. The user needs to provide the public key of the wallet the transfer will be directed to, along with the amount to be transferred in SOL. **_Make sure the sender/feepayer account has enough funds for the fee!_**
 ```
 Usage: node out/index.js transfer [options] <otherPublicKey> <amountInSol>
 
@@ -77,7 +77,7 @@ Detected existing wallets:
 Please enter the order number of the wallet you want to interact with: 
 ```
 Selecting a wallet to use for an action is as simple as providing the order number of the wallet.
- 
+
 If you want to manually enter a key pair to the wallets.json, ensure that the **secretKey** is a valid sequence of bytes and that it matches the expected format for **UInt8Array**s.
 
 Example wallets.json format provided below:
