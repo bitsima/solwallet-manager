@@ -96,4 +96,4 @@ Example wallets.json format provided below:
 + generate keypair by mnemonic phrase option
 + delete wallet command
 + logger
-+ colorize outputs more, using chalk
++ ~~colorize outputs more, using chalk~~
