@@ -1,5 +1,5 @@
 # solwallet-manager
-solwallet-manager is a command-line tool developed for Linux systems and tested exclusively on this platform. It is designed to work with Node.js 18 and requires compilation with TypeScript (tsc).\\This tool by default, works on the **testnet** of the Solana network. Change the URL on top of index.ts file if you want it to do otherwise.
+solwallet-manager is a command-line tool developed for Linux systems and tested exclusively on this platform. It is designed to work with Node.js 18 and requires compilation with TypeScript (tsc).  This tool by default, works on the **testnet** of the Solana network. Change the URL on top of index.ts file if you want it to do otherwise.
 
 ## Installation
 1. Ensure you have Node.js 18 installed.
