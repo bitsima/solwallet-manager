@@ -37,7 +37,7 @@ Options:
 ```
 
 ### 2. 'airdrop'
-Request an airdrop to the selected wallet. The user needs to provide the amount to be requested in SOL. Max SOL to request at a time is 5.
+Request an airdrop to the selected wallet. The user needs to provide the amount to be requested in SOL. Max SOL to request at a time is 1.
 The airdrop will be done on the wallet selected from the wallets.json. For further info on how selecting a wallet from the wallets.json works, see [here](#how-selectWallet-and-wallets.json-work).
 ```
 Usage: node out/index.js airdrop [options] [amountInSOL]
