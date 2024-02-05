@@ -57,9 +57,9 @@ program
         let parsedAmount = parseFloat(amount);
 
         // Check if the parsed amount is NaN or exceeds the maximum allowed
-        if (isNaN(parsedAmount) || parsedAmount > 5) {
-            console.error('Invalid amount. Setting amount to the maximum allowed (5 SOLs).');
-            parsedAmount = 5;  // Set amount to the maximum allowed
+        if (isNaN(parsedAmount) || parsedAmount > 1) {
+            console.error('Invalid amount. Setting amount to the maximum allowed (1 SOLs).');
+            parsedAmount = 1;  // Set amount to the maximum allowed
         }
         else {
             console.log(`Chosen amount to airdrop is ${parsedAmount} SOL.`)
