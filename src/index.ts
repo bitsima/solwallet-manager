@@ -4,7 +4,8 @@ import * as commander from 'commander';
 import * as chalk from 'chalk';
 import { Connection, clusterApiUrl } from '@solana/web3.js';
 
-import { createWallet, selectWallet, handleAirdrop } from './utils';
+import { createWallet, handleAirdrop } from './commands';
+import { selectWallet } from './helpers';
 
 
 
@@ -56,8 +57,7 @@ program
             console.log(`Chosen amount to airdrop is ${parsedAmount} SOL.`)
         }
 
-        const selectedWalletObj = await selectWallet();
-        console.log(selectedWalletObj.publicKey);
+        let selectedWalletObj = await selectWallet();
         await handleAirdrop(selectedWalletObj, parsedAmount);
     });
 
