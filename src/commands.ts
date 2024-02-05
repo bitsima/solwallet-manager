@@ -1,3 +1,4 @@
+import * as readline from 'readline';
 import {
     Keypair,
     Transaction,
@@ -10,13 +11,9 @@ import {
 import { CONNECTION, WALLETS_MAP } from './index';
 import { Wallet } from './models/classes';
 import { updateBalance, writeWallets } from './helpers';
-import * as readline from 'readline';
-
-
 
 /**
- * Allows the user to provide a key pair manually or generates a new key pair if they are not given, 
- * either way, this function saves the new wallet info to the wallets.json.
+ * Generates a new key pair and saves the new wallet info to the wallets.json.
  * @param walletName the chosen arbitrary name to be given to the new wallet
  */
 export async function createWallet(walletName: string): Promise<void> {
@@ -34,10 +31,15 @@ export async function createWallet(walletName: string): Promise<void> {
     // Add the new wallet to the global wallets map
     WALLETS_MAP.set(newWallet.walletName, newWallet);
 
+    // Update wallets.json
     await writeWallets();
 }
 
-
+/**
+ * Requests the specified amount of SOL from the network for the managed wallet.
+ * @param walletObj Wallet instance to request airdrop on 
+ * @param amount amount to be requested in SOL
+ */
 export async function handleAirdrop(walletObj: Wallet, amount: number) {
     try {
         const myAddress = new PublicKey(walletObj.publicKey);
@@ -49,7 +51,13 @@ export async function handleAirdrop(walletObj: Wallet, amount: number) {
     await updateBalance(walletObj);
 }
 
-export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: string, amount: number) {
+/**
+ * Transfers the specified amount of SOL to the specified wallet, also paying a fee in the process.
+ * @param selectedWalletObj managed wallet to transfer SOL from
+ * @param otherPublicKey the address to send SOL to
+ * @param amount amount of SOL to send
+ */
+export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: string, amount: number): Promise<void> {
 
     // Create a transaction 
     const tx = new Transaction().add(
@@ -71,7 +79,6 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
 
     const estimatedFee = await tx.getEstimatedFee(CONNECTION);
 
-
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -83,13 +90,10 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
             resolve(answer.trim() || "Y"); // Trim to remove leading/trailing whitespaces, set "Y" as the default
         });
     });
-
     // Wait for the user's input
     const answer = await questionPromise;
-
     // Close the readline interface
     rl.close();
-
 
     if (answer.toLowerCase() === "y") {
         console.log("Proceeding with the operation...");
@@ -103,22 +107,13 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
         console.log("Invalid input. Please try again.");
         return;
     }
-
-
+    // Sign and send the confirmed transaction to the network 
     try {
         const signature = await sendAndConfirmTransaction(CONNECTION, tx, [keypair]);
         console.log("Transaction successfully sent! Here is the signature: ", signature);
+        // Update balance of the sender wallet in the wallets.json
         await updateBalance(selectedWalletObj);
     } catch (error) {
         console.error("There was an error while sending the transaction: ", error);
     }
-
 }
-
-/*
-
-export async function handleStatisticsCommand() {
-    await getStatistics();
-}
-
-*/

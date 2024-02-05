@@ -138,4 +138,3 @@ export function selectWallet(): Promise<Wallet | null> {
         return Promise.resolve(null);
     }
 }
-
