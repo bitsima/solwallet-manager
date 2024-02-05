@@ -1,5 +1,7 @@
 # solwallet-manager
-solwallet-manager is a command-line tool developed for Linux systems and tested exclusively on this platform. It is designed to work with Node.js 18 and requires compilation with TypeScript (tsc).  This tool by default, works on the **testnet** of the Solana network. Change the URL on top of index.ts file if you want it to do otherwise.
+solwallet-manager is a command-line tool developed for Linux systems and tested exclusively on this platform. It is designed to work with Node.js 18 and requires compilation with TypeScript (tsc).
+
+This tool by default, works on the **testnet** of the Solana network. Change the URL on top of index.ts file if you want it to do otherwise.
 
 ## Installation
 1. Ensure you have Node.js 18 installed.
@@ -38,7 +40,9 @@ Options:
 
 ### 2. 'airdrop'
 Request an airdrop to the selected wallet. The user needs to provide the amount to be requested in SOL. Max SOL to request at a time is 1.
-The airdrop will be done on the wallet selected from the wallets.json. For further info on how selecting a wallet from the wallets.json works, see [here](#how-selectWallet-and-wallets.json-work).
+The airdrop will be done on the wallet selected from the wallets.json. 
+
+For further info on how selecting a wallet from the wallets.json works, see [here](#how-selectWallet-and-walletsjson-work).
 ```
 Usage: node out/index.js airdrop [options] [amountInSOL]
 
@@ -56,7 +60,7 @@ Options:
 ```
 
 ### 4. 'transfer'
-Sends SOL to a specified wallet. The user needs to provide the public key of the wallet the transfer will be directed to, along with the amount to be transferred in SOL. **Make sure the sender/feepayer account has enough funds for the fee!**
+Sends SOL to a specified wallet. The user needs to provide the public key of the wallet the transfer will be directed to, along with the amount to be transferred in SOL. **__Make sure the sender/feepayer account has enough funds for the fee!__**
 ```
 Usage: node out/index.js transfer [options] <otherPublicKey> <amountInSol>
 
@@ -72,8 +76,10 @@ Detected existing wallets:
 [2] - Wallet Name: bar, Public Key: <public key in Base58>
 Please enter the order number of the wallet you want to interact with: 
 ```
-Selecting a wallet to use for an action is as simple as providing the order number of the wallet. 
+Selecting a wallet to use for an action is as simple as providing the order number of the wallet.
+ 
 If you want to manually enter a key pair to the wallets.json, ensure that the **secretKey** is a valid sequence of bytes and that it matches the expected format for **UInt8Array**s.
+
 Example wallets.json format provided below:
 ```json
 {
