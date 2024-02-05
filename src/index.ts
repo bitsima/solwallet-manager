@@ -11,11 +11,10 @@ import { readWallets, selectWallet, updateBalance } from './helpers';
 // Change this url to change the net the app works on
 const CLUSTER_URL = "https://api.testnet.solana.com";
 
-
+// Global singular Connection to Solana
 export const CONNECTION = new Connection(CLUSTER_URL, "confirmed");
 
 export const WALLETS_MAP = readWallets();
-
 
 const program = new commander.Command();
 
@@ -23,14 +22,14 @@ program
     .version('1.0.0')
     .description('Solana Wallet Management and Blockchain Statistics')
 
-    // Greet the user and check for existing wallets in the wallets.json when called with no commands
+    // Greet the user 
     .action(() => {
-        console.log(chalk.bold.green('Welcome to Solana Wallet Manager!'));
+        console.log(chalk.bold.green('Welcome to Solana Wallet Manager!\n For available commands see "--help"!'));
     });
 
 program
     .command('new')
-    .description('Create or manage Solana wallets.')
+    .description('Create and name Solana wallets.')
     .option('-c, --create <wallet_name>', 'Generate a new public-private key pair')
     .action((cmd) => {
         if (WALLETS_MAP.has(cmd.create)) {
@@ -43,12 +42,12 @@ program
         }
     });
 
-
 program
     .command('airdrop [amountInSOL]')
     .description('Request an airdrop to a managed wallet.')
     .action(async (amount = 1) => {
 
+        // null check for the case when wallets.json is empty
         let selectedWalletObj = await selectWallet();
         if (selectedWalletObj == null) {
             return;
@@ -73,28 +72,22 @@ program
     .command('balance')
     .description('Check and update wallet funds.')
     .action(async () => {
+        // null check for the case when wallets.json is empty
         let selectedWalletObj = await selectWallet();
         if (selectedWalletObj != null) {
             await updateBalance(selectedWalletObj);
         }
     });
 
-
 program
     .command('transfer <otherPublicKey> <amountInSol>')
     .description('Send SOL to a specified wallet.')
     .action(async (otherPublicKey, amount) => {
+        // null check for the case when wallets.json is empty
         let selectedWalletObj = await selectWallet();
         if (selectedWalletObj != null) {
             await transferSOL(selectedWalletObj, otherPublicKey, amount);
         }
     });
 
-/*
-program
-    .command('statistics')
-    .description('Retrieve statistics on the Solana Devnet.')
-    .action(() => getStatistics());
-
-*/
 program.parse(process.argv);

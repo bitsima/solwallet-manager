@@ -10,14 +10,13 @@ import { WALLETS_MAP } from './index';
 
 
 /**
- * Reads the wallets.json if it exists.
+ * Reads the wallets.json if it exists, creates it if not.
  * @returns wallets map -read from the wallets.json and deserialized into Wallet instances-
  */
 export function readWallets(): Map<string, Wallet> {
     let walletMap: Map<string, Wallet> = null;
 
     try {
-
         // Synchronously check if the file exists
         if (!fs.existsSync('./wallets.json')) {
             // If the file doesn't exist, create an empty one
@@ -38,7 +37,6 @@ export function readWallets(): Map<string, Wallet> {
                 walletJson.balance
             )
         ]));
-
     } catch (error) {
         // Handle file not found or invalid JSON
         console.log(`Error reading or parsing wallets.json: ${error.message}`);
@@ -46,6 +44,9 @@ export function readWallets(): Map<string, Wallet> {
     return walletMap;
 }
 
+/**
+ * Writes the current wallets in the WALLETS_MAP instance to the wallets.json after serializing them back to WalletJson format.
+ */
 export async function writeWallets(): Promise<void> {
 
     const walletObjArr = Array.from(WALLETS_MAP.values());
@@ -60,7 +61,6 @@ export async function writeWallets(): Promise<void> {
         }))
     };
 
-    // Update wallets.json with the new wallet info
     try {
         await fsp.writeFile("./wallets.json", JSON.stringify(jsonData, null, 4), 'utf8');
         console.log('wallets.json file has been updated successfully.');
@@ -69,6 +69,12 @@ export async function writeWallets(): Promise<void> {
     }
 }
 
+/**
+ * Updates the balance of the specified wallet object to the latest by calling Wallet.checkBalance() method.
+ * Alerts the user of the outcome. 
+ * @param walletObj Wallet instance to update the balance attribute of
+ * @returns Promise<void>
+ */
 export async function updateBalance(walletObj: Wallet): Promise<void> {
     const oldBalance = walletObj.balance;
 
@@ -78,7 +84,9 @@ export async function updateBalance(walletObj: Wallet): Promise<void> {
         console.log(`Your balance on the wallet named '${walletObj.walletName}' has been updated \
 from '${oldBalance / LAMPORTS_PER_SOL}' SOL to '${walletObj.balance / LAMPORTS_PER_SOL}' SOL.`);
 
+        // Change the corresponding global Wallet instance to the updated one
         WALLETS_MAP.set(walletObj.walletName, walletObj);
+        // Write the updated list to save it in the wallets.json
         writeWallets();
         return;
     }
@@ -86,6 +94,10 @@ from '${oldBalance / LAMPORTS_PER_SOL}' SOL to '${walletObj.balance / LAMPORTS_P
 Your balance: ${walletObj.balance / LAMPORTS_PER_SOL} SOL`);
 }
 
+/**
+ * Prompts the user to select a wallet from the listed wallets. 
+ * @returns Promise<Wallet | null>
+ */
 export function selectWallet(): Promise<Wallet | null> {
 
     const wallets: Wallet[] = Array.from(WALLETS_MAP.values());
@@ -99,7 +111,6 @@ export function selectWallet(): Promise<Wallet | null> {
             console.log(`[${++index}] - Wallet Name: ${wallet.walletName}, Public Key: ${wallet.publicKey}`);
         });
 
-        // Let the user choose which wallet to use for this instance 
         // Create a Promise to handle the asynchronous input
         return new Promise((resolve) => {
             const rl = readline.createInterface({
@@ -122,7 +133,7 @@ export function selectWallet(): Promise<Wallet | null> {
                 rl.close();
             });
         });
-    } else {
+    } else { // Handle the wallets.json being empty case
         console.log(chalk.gray('No existing wallets detected. If you want to create one, check command "new --help".'));
         return Promise.resolve(null);
     }
