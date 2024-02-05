@@ -56,7 +56,7 @@ Options:
 ```
 
 ### 4. 'transfer'
-Sends SOL to a specified wallet. The user needs to provide the public key of the wallet the transfer will be directed to, along with the amount to be transferred in SOL.
+Sends SOL to a specified wallet. The user needs to provide the public key of the wallet the transfer will be directed to, along with the amount to be transferred in SOL. **Make sure the sender/feepayer account has enough funds for the fee!**
 ```
 Usage: node out/index.js transfer [options] <otherPublicKey> <amountInSol>
 
