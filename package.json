@@ -4,7 +4,7 @@
   "description": "Basic wallet management practice script for sol wallets.",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node out/index.js"
   },
   "repository": {
     "type": "git",
