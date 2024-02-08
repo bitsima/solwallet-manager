@@ -87,7 +87,8 @@ export async function transferSOL(selectedWalletObj: Wallet, otherPublicKey: str
 
     // Create a Promise to wrap the rl.question
     const questionPromise = new Promise<string>((resolve) => {
-        rl.question(chalk.bgCyanBright(`Estimated fee for this transaction will be: ${estimatedFee / LAMPORTS_PER_SOL} SOL. Do you want to proceed with it? [Y, n]  `), (answer = "Y") => {
+        rl.question(chalk.cyanBright(`Estimated fee for this transaction will be: ${estimatedFee / LAMPORTS_PER_SOL} SOL. \
+Do you want to proceed with it? [Y, n]  `), (answer = "Y") => {
             resolve(answer.trim() || "Y"); // Trim to remove leading/trailing whitespaces, set "Y" as the default
         });
     });
