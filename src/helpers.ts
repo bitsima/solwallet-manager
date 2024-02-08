@@ -6,7 +6,7 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 import { Wallet } from "./models/classes";
 import { WalletJson } from "./models/interfaces";
-import { WALLETS_MAP } from './index';
+import { WALLETS_MAP, WALLETS_PATH } from './index';
 
 
 /**
@@ -18,13 +18,13 @@ export function readWallets(): Map<string, Wallet> {
 
     try {
         // Synchronously check if the file exists
-        if (!fs.existsSync('./wallets.json')) {
+        if (!fs.existsSync(WALLETS_PATH)) {
             // If the file doesn't exist, create an empty one
-            fs.writeFileSync('./wallets.json', '{"data": []}', 'utf-8');
+            fs.writeFileSync(WALLETS_PATH, '{"data": []}', 'utf-8');
             console.log(chalk.magentaBright("wallets.json couldn't be found. A new one was created."))
         }
 
-        const walletData = fs.readFileSync('./wallets.json', 'utf8');
+        const walletData = fs.readFileSync(WALLETS_PATH, 'utf8');
         const jsonData: WalletJson[] = JSON.parse(walletData).data;
 
         // Deserializing the JSON data and creating a Map
@@ -62,7 +62,7 @@ export async function writeWallets(): Promise<void> {
     };
 
     try {
-        await fsp.writeFile("./wallets.json", JSON.stringify(jsonData, null, 4), 'utf8');
+        await fsp.writeFile(WALLETS_PATH, JSON.stringify(jsonData, null, 4), 'utf8');
         console.log('wallets.json file has been updated successfully.');
     } catch (error) {
         console.error(chalk.redBright(`Error writing to JSON file: `), error);

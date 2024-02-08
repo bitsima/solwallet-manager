@@ -6,15 +6,18 @@ import { Connection } from '@solana/web3.js';
 
 import { createWallet, handleAirdrop, transferSOL } from './commands';
 import { readWallets, selectWallet, updateBalance } from './helpers';
+import { Wallet } from './models/classes';
 
 
 // Change this url to change the net the app works on
 const CLUSTER_URL = "https://api.testnet.solana.com";
 
 // Global singular Connection to Solana
-export const CONNECTION = new Connection(CLUSTER_URL, "confirmed");
+export const CONNECTION: Connection = new Connection(CLUSTER_URL, "confirmed");
 
-export const WALLETS_MAP = readWallets();
+export const WALLETS_PATH: string = "./wallets.json";
+export const WALLETS_MAP: Map<string, Wallet> = readWallets();
+
 
 const program = new commander.Command();
 
