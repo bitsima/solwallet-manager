@@ -78,7 +78,8 @@ Please enter the order number of the wallet you want to interact with:
 ```
 Selecting a wallet to use for an action is as simple as providing the order number of the wallet.
 
-If you want to manually enter a key pair to the wallets.json, ensure that the **secretKey** is a valid sequence of bytes and that it matches the expected format for **UInt8Array**s.
++ If you want to manually enter a key pair to the wallets.json, ensure that the **secretKey** is a valid sequence of bytes and that it matches the expected format for **UInt8Array**s.
++ If you want to change the directory the **wallets.json** is generated in, just change the **WALLETS_PATH** variable that is on top of the index.ts file.
 
 Example wallets.json format provided below:
 ```json
@@ -102,4 +103,5 @@ Example wallets.json format provided below:
 + generate keypair by mnemonic phrase option
 + delete wallet command
 + logger
++ wallets.json encryption
 + ~~colorize outputs more, using chalk~~
